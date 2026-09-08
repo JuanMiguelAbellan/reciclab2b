@@ -1,0 +1,93 @@
+services:
+    laravel.test:
+        build:
+            context: './vendor/laravel/sail/runtimes/8.5'
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+        image: 'sail-8.5/app'
+        restart: always
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            - mysql
+
+    reverb:
+        build:
+            context: './vendor/laravel/sail/runtimes/8.5'
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+        image: 'sail-8.5/app'
+        restart: always
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            - mysql
+        # Saltamos el entrypoint "start-container" de Sail (que siempre lanza
+        # supervisord con php-fpm/nginx) para arrancar solo Reverb aquí — pero
+        # como usuario "sail" (no root), para que los archivos que toque
+        # (storage/logs, cache) queden con el mismo dueño que los del
+        # contenedor laravel.test y no den "Permission denied" cruzado.
+        user: sail
+        entrypoint: ['php', 'artisan', 'reverb:start', '--host=0.0.0.0', '--port=8080']
+
+    caddy:
+        image: 'caddy:2-alpine'
+        restart: always
+        environment:
+            APP_DOMAIN: '${APP_DOMAIN}'
+        ports:
+            - '80:80'
+            - '443:443'
+        volumes:
+            - './docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro'
+            - 'caddy-data:/data'
+            - 'caddy-config:/config'
+        networks:
+            - sail
+        depends_on:
+            - laravel.test
+            - reverb
+
+    mysql:
+        image: 'mysql:8.4'
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ROOT_HOST: '%'
+            MYSQL_DATABASE: '${DB_DATABASE}'
+            MYSQL_USER: '${DB_USERNAME}'
+            MYSQL_PASSWORD: '${DB_PASSWORD}'
+        volumes:
+            - 'sail-mysql:/var/lib/mysql'
+        networks:
+            - sail
+        healthcheck:
+            test:
+                - CMD
+                - mysqladmin
+                - ping
+                - '-p${DB_PASSWORD}'
+            retries: 3
+            timeout: 5s
+networks:
+    sail:
+        driver: bridge
+volumes:
+    sail-mysql:
+        driver: local
+    caddy-data:
+        driver: local
+    caddy-config:
+        driver: local

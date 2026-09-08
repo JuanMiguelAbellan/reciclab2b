@@ -1,0 +1,9 @@
+{$APP_DOMAIN} {
+    encode gzip
+
+    # Reverb (WebSockets de mensajería/pedidos en tiempo real) — mismo dominio,
+    # protocolo Pusher que usa laravel-echo por defecto en /app/{key}.
+    reverse_proxy /app/* reverb:8080
+
+    reverse_proxy laravel.test:80
+}
