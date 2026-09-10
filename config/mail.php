@@ -65,6 +65,13 @@ return [
             'transport' => 'resend',
         ],
 
+        // Railway bloquea el puerto SMTP saliente (comprobado en otro
+        // proyecto del mismo autor sobre la misma infraestructura), así que
+        // el correo va por la API HTTPS de Brevo en vez de SMTP.
+        'brevo' => [
+            'transport' => 'brevo+api',
+        ],
+
         'sendmail' => [
             'transport' => 'sendmail',
             'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
