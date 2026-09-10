@@ -6,6 +6,14 @@ import Button from '@/components/ui/Button';
 import Alert from '@/components/ui/Alert';
 import { type SharedPageProps } from '@/types';
 
+const DEMO_ACCOUNTS = [
+    { role: 'Superadmin', email: 'superadmin@reciclab2b.test' },
+    { role: 'Admin', email: 'admin@reciclab2b.test' },
+    { role: 'Productor', email: 'productor@reciclab2b.test' },
+    { role: 'Comprador', email: 'comprador@reciclab2b.test' },
+];
+const DEMO_PASSWORD = 'password';
+
 export default function Login() {
     const { flash } = usePage<SharedPageProps>().props;
 
@@ -20,11 +28,35 @@ export default function Login() {
         post('/login');
     };
 
+    const fillDemoAccount = (email: string) => {
+        setData({ email, password: DEMO_PASSWORD, remember: data.remember });
+    };
+
     return (
         <GuestLayout>
             <Head title="Iniciar sesión" />
 
             <h1 className="text-xl font-semibold text-neutral-900">Iniciar sesión</h1>
+
+            <div className="mt-4 rounded-lg border border-accent-200 bg-accent-50/60 p-3 text-sm">
+                <p className="font-medium text-neutral-900">Portfolio: cuentas de demostración</p>
+                <p className="mt-1 text-neutral-600">
+                    Contraseña para todas: <code className="rounded bg-white px-1 py-0.5">{DEMO_PASSWORD}</code>
+                </p>
+                <ul className="mt-2 space-y-1">
+                    {DEMO_ACCOUNTS.map((account) => (
+                        <li key={account.email}>
+                            <button
+                                type="button"
+                                onClick={() => fillDemoAccount(account.email)}
+                                className="text-left text-accent-700 underline-offset-2 hover:underline"
+                            >
+                                {account.role}: {account.email}
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            </div>
 
             {flash.status && <Alert variant="success">{flash.status}</Alert>}
 
