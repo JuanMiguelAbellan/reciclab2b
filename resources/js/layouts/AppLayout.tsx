@@ -78,40 +78,61 @@ export default function AppLayout({ children }: PropsWithChildren) {
 
                     <nav className="flex items-center gap-1 text-sm">
                         {auth.user ? (
-                            <>
-                                <Link href="/mercado" className={navLinkClasses}>
-                                    Mercado
-                                </Link>
-                                <Link href="/ofertas" className={navLinkClasses}>
-                                    Mis ofertas
-                                </Link>
-                                <Link href="/pedidos" className="text-neutral-600 hover:underline">
-                                    Pedidos
-                                </Link>
-                                {auth.user.has_company && (
-                                    <Link href="/empresa" className={navLinkClasses}>
-                                        Mi empresa
+                            auth.user.is_staff ? (
+                                <>
+                                    <a
+                                        href="/admin"
+                                        className="rounded-full bg-accent-500 px-4 py-1.5 font-semibold text-neutral-900 shadow-sm transition-all duration-150 hover:-translate-y-px hover:bg-accent-400 hover:shadow-md"
+                                    >
+                                        Panel de administración
+                                    </a>
+                                    <span className="ml-2 mr-1 hidden text-neutral-500 sm:inline">
+                                        {auth.user.full_name}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={logout}
+                                        className={navLinkClasses}
+                                    >
+                                        Cerrar sesión
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <Link href="/mercado" className={navLinkClasses}>
+                                        Mercado
                                     </Link>
-                                )}
-                                <Link href="/mensajes" className={`relative ${navLinkClasses}`}>
-                                    Mensajes
-                                    {auth.user.unread_conversations_count > 0 && (
-                                        <span className="ml-1.5 inline-flex h-5 min-w-5 animate-pulse items-center justify-center rounded-full bg-accent-500 px-1.5 text-xs font-semibold text-neutral-900">
-                                            {auth.user.unread_conversations_count}
-                                        </span>
+                                    <Link href="/ofertas" className={navLinkClasses}>
+                                        Mis ofertas
+                                    </Link>
+                                    <Link href="/pedidos" className="text-neutral-600 hover:underline">
+                                        Pedidos
+                                    </Link>
+                                    {auth.user.has_company && (
+                                        <Link href="/empresa" className={navLinkClasses}>
+                                            Mi empresa
+                                        </Link>
                                     )}
-                                </Link>
-                                <span className="ml-2 mr-1 hidden text-neutral-500 sm:inline">
-                                    {auth.user.full_name}
-                                </span>
-                                <button
-                                    type="button"
-                                    onClick={logout}
-                                    className={navLinkClasses}
-                                >
-                                    Cerrar sesión
-                                </button>
-                            </>
+                                    <Link href="/mensajes" className={`relative ${navLinkClasses}`}>
+                                        Mensajes
+                                        {auth.user.unread_conversations_count > 0 && (
+                                            <span className="ml-1.5 inline-flex h-5 min-w-5 animate-pulse items-center justify-center rounded-full bg-accent-500 px-1.5 text-xs font-semibold text-neutral-900">
+                                                {auth.user.unread_conversations_count}
+                                            </span>
+                                        )}
+                                    </Link>
+                                    <span className="ml-2 mr-1 hidden text-neutral-500 sm:inline">
+                                        {auth.user.full_name}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={logout}
+                                        className={navLinkClasses}
+                                    >
+                                        Cerrar sesión
+                                    </button>
+                                </>
+                            )
                         ) : (
                             <>
                                 <Link href="/acerca-de" className={navLinkClasses}>

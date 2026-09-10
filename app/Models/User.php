@@ -59,7 +59,18 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->isApproved() && $this->hasAnyRole([RoleName::SuperAdmin->value, RoleName::Admin->value]);
+        return $this->isApproved() && $this->isStaff();
+    }
+
+    /**
+     * Staff roles (superadmin/admin) manage the platform from the Filament
+     * panel instead of belonging to a company — used to gate access to
+     * /admin (canAccessPanel) and to steer the main app's UI away from
+     * company-only features (nav links, dashboard) for these users.
+     */
+    public function isStaff(): bool
+    {
+        return $this->hasAnyRole([RoleName::SuperAdmin->value, RoleName::Admin->value]);
     }
 
     public function getFilamentName(): string

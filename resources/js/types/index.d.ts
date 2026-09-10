@@ -7,6 +7,7 @@ export interface User {
     status: 'pending' | 'approved' | 'rejected' | 'blocked' | 'inactive';
     email_verified_at: string | null;
     has_company: boolean;
+    is_staff: boolean;
     unread_conversations_count: number;
 }
 
