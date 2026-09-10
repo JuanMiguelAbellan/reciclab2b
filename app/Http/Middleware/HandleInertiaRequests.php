@@ -49,6 +49,7 @@ class HandleInertiaRequests extends Middleware
                     'status' => $user->status->value,
                     'email_verified_at' => $user->email_verified_at,
                     'has_company' => $user->companies()->exists(),
+                    'is_staff' => $user->isStaff(),
                     'unread_conversations_count' => $user->unreadConversationsCount(),
                 ] : null,
             ],
