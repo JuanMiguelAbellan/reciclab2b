@@ -8,12 +8,14 @@ use App\Enums\OrderStatus;
 use App\Models\Offer;
 use App\Models\Order;
 use App\Models\User;
+use App\Services\Stats\StatsWebhookClient;
 use RuntimeException;
 
 class CloseOfferAction
 {
     public function __construct(
         private readonly RejectOrderAction $rejectOrder,
+        private readonly StatsWebhookClient $statsWebhook,
     ) {}
 
     /**
@@ -34,6 +36,8 @@ class CloseOfferAction
         $offer->status = OfferStatus::Closed;
         $offer->closed_at = now();
         $offer->save();
+
+        $this->statsWebhook->offerClosed($offer);
 
         $offer->orders()
             ->where('status', OrderStatus::Pending)

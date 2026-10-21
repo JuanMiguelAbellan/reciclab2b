@@ -15,6 +15,7 @@ use App\Models\Company;
 use App\Models\Offer;
 use App\Models\Order;
 use App\Models\User;
+use App\Services\Stats\StatsWebhookClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 use Tests\TestCase;
@@ -107,7 +108,7 @@ class OfferLifecycleTest extends TestCase
     {
         $offer = Offer::factory()->for($this->company)->create();
 
-        (new PublishOfferAction)->handle($offer);
+        (new PublishOfferAction(new StatsWebhookClient))->handle($offer);
 
         $this->assertSame(OfferStatus::Published, $offer->status);
         $this->assertNotNull($offer->published_at);
@@ -129,14 +130,14 @@ class OfferLifecycleTest extends TestCase
         (new PauseOfferAction)->handle($offer);
         $this->assertSame(OfferStatus::Paused, $offer->status);
 
-        (new PublishOfferAction)->handle($offer);
+        (new PublishOfferAction(new StatsWebhookClient))->handle($offer);
         $this->assertSame(OfferStatus::Published, $offer->status);
     }
 
     public function test_closing_is_final(): void
     {
         $offer = Offer::factory()->for($this->company)->published()->create();
-        $action = new CloseOfferAction(new RejectOrderAction(new SendMessageAction));
+        $action = new CloseOfferAction(new RejectOrderAction(new SendMessageAction), new StatsWebhookClient);
 
         $action->handle($this->member, $offer);
         $this->assertSame(OfferStatus::Closed, $offer->status);
@@ -155,7 +156,7 @@ class OfferLifecycleTest extends TestCase
             'quantity_tons' => 10,
         ]);
 
-        (new CloseOfferAction(new RejectOrderAction(new SendMessageAction)))->handle($this->member, $offer);
+        (new CloseOfferAction(new RejectOrderAction(new SendMessageAction), new StatsWebhookClient))->handle($this->member, $offer);
 
         $this->assertSame(OrderStatus::Rejected, $pendingOrder->refresh()->status);
         $this->assertSame($this->member->id, $pendingOrder->responded_by);
@@ -181,7 +182,7 @@ class OfferLifecycleTest extends TestCase
 
         $this->expectException(RuntimeException::class);
 
-        (new PublishOfferAction)->handle($offer);
+        (new PublishOfferAction(new StatsWebhookClient))->handle($offer);
     }
 
     public function test_status_is_not_mass_assignable_through_the_update_action(): void

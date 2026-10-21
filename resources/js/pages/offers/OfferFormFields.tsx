@@ -2,6 +2,7 @@ import InputField from '@/components/ui/InputField';
 import SelectField from '@/components/ui/Select';
 import TextareaField from '@/components/ui/Textarea';
 import LocationPicker from '@/components/map/LocationPicker';
+import PriceSuggestionHint from './PriceSuggestionHint';
 
 export interface OfferOption {
     value: string;
@@ -68,6 +69,7 @@ export default function OfferFormFields({ data, setData, errors, materialTypes }
                     required
                 />
             </div>
+            <PriceSuggestionHint material={data.material} generationYear={data.generation_year} />
 
             <InputField
                 label="Año de generación"

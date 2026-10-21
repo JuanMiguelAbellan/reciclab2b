@@ -48,6 +48,7 @@ Route::middleware(['auth', 'verified', 'approved', 'has-company'])->group(functi
     Route::prefix('ofertas')->name('offers.')->group(function () {
         Route::get('/', [OfferController::class, 'index'])->name('index');
         Route::get('/crear', [OfferController::class, 'create'])->name('create');
+        Route::get('/sugerencia-precio', [OfferController::class, 'priceSuggestion'])->name('price-suggestion');
         Route::post('/', [OfferController::class, 'store'])->name('store');
         Route::get('/{offer}/editar', [OfferController::class, 'edit'])->name('edit');
         Route::put('/{offer}', [OfferController::class, 'update'])->name('update');

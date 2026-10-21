@@ -11,9 +11,12 @@ use App\Enums\MaterialType;
 use App\Http\Requests\StoreOfferRequest;
 use App\Http\Requests\UpdateOfferRequest;
 use App\Models\Offer;
+use App\Services\Stats\StatsWebhookClient;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rules\Enum;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -41,6 +44,27 @@ class OfferController extends Controller
         return Inertia::render('offers/Create', [
             'materialTypes' => $this->materialTypeOptions(),
         ]);
+    }
+
+    /**
+     * Small JSON endpoint for the create/edit forms: as the producer fills in
+     * material + generation year, fetch a suggested price from reciclab2b-stats.
+     * A plain Inertia page prop can't react to in-form typing, and this only
+     * needs to update two fields — a manual fetch from the React form is the
+     * justified exception to "no manual fetch" here, not a general pattern.
+     */
+    public function priceSuggestion(Request $request, StatsWebhookClient $statsWebhook): JsonResponse
+    {
+        Gate::authorize('create', Offer::class);
+
+        $filters = $request->validate([
+            'material' => ['required', new Enum(MaterialType::class)],
+            'generation_year' => ['required', 'integer', 'min:1900', 'max:2100'],
+        ]);
+
+        $suggestion = $statsWebhook->priceSuggestion($filters['material'], (int) $filters['generation_year']);
+
+        return response()->json(['suggestion' => $suggestion]);
     }
 
     public function store(StoreOfferRequest $request, CreateOfferAction $action): RedirectResponse

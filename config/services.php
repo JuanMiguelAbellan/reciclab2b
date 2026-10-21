@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'reciclab2b_stats' => [
+        'url' => env('RECICLAB2B_STATS_URL'),
+        'api_key' => env('RECICLAB2B_STATS_API_KEY'),
+    ],
+
 ];

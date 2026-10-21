@@ -17,6 +17,7 @@ use App\Models\Conversation;
 use App\Models\Offer;
 use App\Models\Order;
 use App\Models\User;
+use App\Services\Stats\StatsWebhookClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 use Tests\TestCase;
@@ -98,7 +99,7 @@ class OrderLifecycleTest extends TestCase
             'quantity_tons' => 40,
         ]);
 
-        (new AcceptOrderAction(new CloseOfferAction(new RejectOrderAction(new SendMessageAction)), new SendMessageAction))->handle($this->sellerMember, $order);
+        (new AcceptOrderAction(new CloseOfferAction(new RejectOrderAction(new SendMessageAction), new StatsWebhookClient), new SendMessageAction))->handle($this->sellerMember, $order);
 
         $this->offer->refresh();
         $this->assertSame(OrderStatus::Accepted, $order->refresh()->status);
@@ -113,7 +114,7 @@ class OrderLifecycleTest extends TestCase
             'quantity_tons' => 100,
         ]);
 
-        (new AcceptOrderAction(new CloseOfferAction(new RejectOrderAction(new SendMessageAction)), new SendMessageAction))->handle($this->sellerMember, $order);
+        (new AcceptOrderAction(new CloseOfferAction(new RejectOrderAction(new SendMessageAction), new StatsWebhookClient), new SendMessageAction))->handle($this->sellerMember, $order);
 
         $this->offer->refresh();
         $this->assertSame(0.0, $this->offer->availableQuantity());
@@ -131,7 +132,7 @@ class OrderLifecycleTest extends TestCase
             'quantity_tons' => 10,
         ]);
 
-        $action = new AcceptOrderAction(new CloseOfferAction(new RejectOrderAction(new SendMessageAction)), new SendMessageAction);
+        $action = new AcceptOrderAction(new CloseOfferAction(new RejectOrderAction(new SendMessageAction), new StatsWebhookClient), new SendMessageAction);
         $action->handle($this->sellerMember, $first);
 
         $this->expectException(RuntimeException::class);
@@ -152,7 +153,7 @@ class OrderLifecycleTest extends TestCase
     {
         $order = Order::factory()->for($this->offer)->accepted()->create(['buyer_company_id' => $this->buyerCompany->id]);
 
-        (new CompleteOrderAction(new SendMessageAction))->handle($this->sellerMember, $order);
+        (new CompleteOrderAction(new SendMessageAction, new StatsWebhookClient))->handle($this->sellerMember, $order);
 
         $this->assertSame(OrderStatus::Completed, $order->refresh()->status);
         $this->assertNotNull($order->completed_at);
@@ -174,7 +175,7 @@ class OrderLifecycleTest extends TestCase
             'buyer_company_id' => $this->buyerCompany->id,
             'quantity_tons' => 100,
         ]);
-        (new AcceptOrderAction(new CloseOfferAction(new RejectOrderAction(new SendMessageAction)), new SendMessageAction))->handle($this->sellerMember, $order);
+        (new AcceptOrderAction(new CloseOfferAction(new RejectOrderAction(new SendMessageAction), new StatsWebhookClient), new SendMessageAction))->handle($this->sellerMember, $order);
         $this->offer->refresh();
         $this->assertSame(OfferStatus::Closed, $this->offer->status);
 
