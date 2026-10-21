@@ -64,8 +64,8 @@ class StatsWebhookClient
 
     /**
      * @return array{suggested_price_per_ton: float|null, sample_size: int, source: string}|null
-     *         null means "couldn't get a suggestion" (service down, no config, bad response) —
-     *         the caller treats that the same as "no suggestion available".
+     *                                                                                           null means "couldn't get a suggestion" (service down, no config, bad response) —
+     *                                                                                           the caller treats that the same as "no suggestion available".
      */
     public function priceSuggestion(string $material, int $generationYear): ?array
     {
